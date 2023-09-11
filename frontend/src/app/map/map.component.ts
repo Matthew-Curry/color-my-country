@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import * as L from 'leaflet'
+import * as L from 'leaflet';
 
 const TILE_LAYER_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OPEN_STREET_ATTRIBUTION = '&copy; <a href="http://www.openstreetmap.org/copyright>OpenStreetMap></a>"';
 const MAX_ZOOM = 18;
-const MIN_ZOOM = 6;
+const MIN_ZOOM = 1;
 const CENTER_LATTITUDE = 39.8355;
 const CENTER_LONGITUDE = -99.0909;
-const MAP_ZOOM = 1;
+const MAP_ZOOM = 4;
 
 @Component({
   selector: 'app-map',
@@ -41,6 +41,11 @@ export class MapComponent implements OnInit{
 
     tiles.addTo(this.map)
 
+  }
+
+  ngAfterViewChecked(): void {
+    this.map.invalidateSize(true);
+    //this.map.center = this.center;
   }
 
 }
