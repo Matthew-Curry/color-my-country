@@ -1,0 +1,64 @@
+{
+  "timelineObjects": [{
+    "placeVisit": {
+      "location": {
+        "latitudeE7": 360931158,
+        "longitudeE7": -875147372,
+        "placeId": "ChIJB_8N0-6yZIgRlrrsYREC3Ic",
+        "address": "Dickson County, TN 37055, USA",
+        "name": "Tennessee City",
+        "locationConfidence": 100.0,
+        "calibratedProbability": 100.0
+      },
+      "duration": {
+        "startTimestamp": "2023-09-20T04:00:00Z",
+        "endTimestamp": "2023-09-20T23:59:00Z"
+      },
+      "placeConfidence": "USER_CONFIRMED",
+      "visitConfidence": 100,
+      "editConfirmationStatus": "CONFIRMED",
+      "locationConfidence": 100,
+      "placeVisitType": "SINGLE_PLACE",
+      "locationAssertionType": "WITHIN_OR_AT",
+      "lastEditedTimestamp": "2023-09-21T20:17:36.787Z",
+      "placeVisitImportance": "MAIN",
+      "editActionMetadata": {
+        "editHistory": {
+          "editEvent": [{
+            "editOperation": ["CREATE"]
+          }]
+        }
+      }
+    }
+  }, {
+    "placeVisit": {
+      "location": {
+        "latitudeE7": 399738691,
+        "longitudeE7": -766910110,
+        "placeId": "ChIJc0iJqOOOyIkRCVUtKIFEY4o",
+        "address": "12 N Marshall St, East York, PA 17402, USA",
+        "locationConfidence": 100.0,
+        "calibratedProbability": 100.0
+      },
+      "duration": {
+        "startTimestamp": "2023-09-21T00:00:00Z",
+        "endTimestamp": "2023-09-21T20:16:44Z"
+      },
+      "placeConfidence": "USER_CONFIRMED",
+      "visitConfidence": 100,
+      "editConfirmationStatus": "CONFIRMED",
+      "locationConfidence": 100,
+      "placeVisitType": "SINGLE_PLACE",
+      "locationAssertionType": "WITHIN_OR_AT",
+      "lastEditedTimestamp": "2023-09-21T20:16:54.057Z",
+      "placeVisitImportance": "MAIN",
+      "editActionMetadata": {
+        "editHistory": {
+          "editEvent": [{
+            "editOperation": ["CREATE"]
+          }]
+        }
+      }
+    }
+  }]
+}
