@@ -1,4 +1,4 @@
-package main
+package GeoLocater
 
 /**************************************************************************
 *Credits:                                                                 *
@@ -13,7 +13,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+
+	//"os"
 	"time"
 )
 
@@ -123,20 +124,21 @@ func getCoordInfo() {
 
 }
 
-func main() {
-	content, err := os.ReadFile("./Example_GoogleData/2023_SEPTEMBER.json")
+func GetCounties(GoogleJson []byte) {
+	//content, err := os.ReadFile("./Example_GoogleData/2023_SEPTEMBER.json")
+	/*
+		if err != nil {
+			fmt.Print("Problem reading file")
+		}
 
-	if err != nil {
-		fmt.Print("Problem reading file")
-	}
-
-	//fmt.Print(content)
-
+		//fmt.Print(content)
+	*/
 	var userLocation TimelineData
-	err = json.Unmarshal(content, &userLocation)
+	err := json.Unmarshal(GoogleJson, &userLocation)
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
+
 	//converts to proper latitude
 	Latitude := float64((userLocation.TimelineObjects[0].PlaceVisit.Location.LatitudeE7)) / 10000000.0
 	fmt.Printf("%.8f\n", Latitude)
