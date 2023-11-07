@@ -103,13 +103,13 @@ func getJson(url string, target interface{}) error {
 
 }
 
-func getCoordInfo() {
+func getCoordInfo(lat float64, lon float64) (string, error) {
 	//test latitude and longitude (for York pa)
-	lat := "39.96"
-	lng := "-76.72"
+	//lat := "39.96"
+	//lng := "-76.72"
 
 	// Construct the URL for the geocoding API request
-	Url := fmt.Sprintf("https://geocode.maps.co/reverse?lat=%s&lon=%s", lat, lng)
+	Url := fmt.Sprintf("https://geocode.maps.co/reverse?lat=%s&lon=%s", lat, lon)
 	fmt.Printf(Url)
 	var inputStruct GeocodeResponse
 
@@ -117,14 +117,15 @@ func getCoordInfo() {
 
 	if err != nil {
 		fmt.Print("HTTP error")
-		return
+		return "", err
 	} else {
-		fmt.Println("\nSuccesfully obtained JSON, County = ", inputStruct.Address.County)
+		county := inputStruct.Address.County
+		return county, nil
 	}
 
 }
 
-func GetCounties(GoogleJson []byte) {
+func GetCounties(GoogleJson []byte) []string {
 	//content, err := os.ReadFile("./Example_GoogleData/2023_SEPTEMBER.json")
 	/*
 		if err != nil {
@@ -133,21 +134,35 @@ func GetCounties(GoogleJson []byte) {
 
 		//fmt.Print(content)
 	*/
+
 	var userLocation TimelineData
 	err := json.Unmarshal(GoogleJson, &userLocation)
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
 
+	countyArr := make([]string, len(userLocation.TimelineObjects))
+
 	//converts to proper latitude
-	Latitude := float64((userLocation.TimelineObjects[0].PlaceVisit.Location.LatitudeE7)) / 10000000.0
-	fmt.Printf("%.8f\n", Latitude)
-	//converts to proper longitude
-	Longitude := float64((userLocation.TimelineObjects[0].PlaceVisit.Location.LongitudeE7)) / 10000000.0
-	fmt.Printf("%.8f\n", Longitude)
+	//go through Timeline objects, and extract all counties
+	for i := 0; i < len(userLocation.TimelineObjects); i++ {
+		Latitude := float64((userLocation.TimelineObjects[0].PlaceVisit.Location.LatitudeE7)) / 10000000.0
+		fmt.Printf("%.8f\n", Latitude)
+		//converts to proper longitude
+		Longitude := float64((userLocation.TimelineObjects[0].PlaceVisit.Location.LongitudeE7)) / 10000000.0
+		fmt.Printf("%.8f\n", Longitude)
+
+		County, err := getCoordInfo(Latitude, Longitude)
+		if err != nil {
+			fmt.Print("Error getting coordinate information")
+		} else {
+			countyArr[i] = County
+		}
+
+	}
 
 	client = &http.Client{Timeout: 10 * time.Second}
 
-	getCoordInfo()
+	return countyArr
 
 }
