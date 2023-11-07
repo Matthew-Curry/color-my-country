@@ -3,7 +3,7 @@
 logMessage "Setting script vars"
 
 # email for certbot
-EMAIL="matt.curry5@gmail.com"
+EMAIL="matt.curry56@gmail.com"
 
 # directories to store source
 CODE_DIR="/code" 
