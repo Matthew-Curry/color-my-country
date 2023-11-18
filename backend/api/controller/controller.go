@@ -38,10 +38,33 @@ func getListOfUserCounties(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func deleteUserCounties(w http.ResponseWriter, r *http.Request) {
+func deleteUserCounties(w http.ResponseWriter, r *http.Request, counties []string) {
+	// Parse query parameters from the request
+	queryParams := r.URL.Query()
 
+	// Access specific query parameters by name
+	userId := queryParams.Get("userid")
+	//convert userId to int
+	ID, err := strconv.Atoi(userId)
+	//handle error
+	if err != nil {
+		fmt.Print("error")
+	}
+	dao.DeleteCountiesforUser(counties, ID)
 }
+//will county be a string? Int? Generic type? (for now string)
+func addcounties(w http.ResponseWriter, r *http.Request, counties []string) {
+	// Parse query parameters from the request
+	queryParams := r.URL.Query()
 
-func addcounties(w http.ResponseWriter, r *http.Request) {
-
+	// Access specific query parameters by name
+	userId := queryParams.Get("userid")
+	//convert userId to int
+	ID, err := strconv.Atoi(userId)
+	//handle error
+	if err != nil {
+		fmt.Print("error")
+	}
+	dao.AddCounitesForUser(counties, ID)
+	
 }

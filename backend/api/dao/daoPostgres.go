@@ -8,4 +8,4 @@ func GetUserCounites(userID int) {
 
 }
 
-func DeleteCountiesforUser(counties []int, userId int)
+func DeleteCountiesforUser(counties []string, userId int)
