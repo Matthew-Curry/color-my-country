@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  db:
+    image: mongo:7.0
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  init-db:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    image: init-color-my-country-db
+    depends_on:
+      - db
+
+  # api:
+    # image: ry-bois-cool-api
+    # depends_on:
+      # - init-db
+    # The API's startup logic should check that the test user exists
+    # and the count of the counties is correct.
+
+volumes:
+  mongo-data:

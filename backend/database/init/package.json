@@ -1,0 +1,11 @@
+{
+    "name": "init-color-my-country-db",
+    "version": "1.0.0",
+    "scripts":{
+        "init-color-my-country-db": "node init-db.js"
+    },
+    "dependencies": {
+      "mongodb": "6.3.0",
+      "fs": "0.0.1-security"
+    }
+  }

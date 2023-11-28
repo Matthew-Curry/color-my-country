@@ -1,0 +1,13 @@
+[
+    {
+        "collectionName": "users",
+        "indexField": "userID",
+        "dataFile": "users.json"
+    },
+
+    {
+        "collectionName": "counties",
+        "indexField": "properties.GEO_ID",
+        "dataFile": "counties.json"
+    }
+]

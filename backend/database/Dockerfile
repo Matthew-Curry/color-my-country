@@ -1,10 +1,18 @@
-FROM mongo:7.0
+FROM node:18.5-slim
 
-# copy seed data and the initialization script to
-# the correct location to be loaded by mongo
-COPY ./users.js /docker-entrypoint-initdb.d/
-COPY ./counties.js /docker-entrypoint-initdb.d/
-COPY ./init-db.js /docker-entrypoint-initdb.d/
+# set workdir, copy required files.
+WORKDIR /usr/src/app
 
-# this is the standard mongo port
-EXPOSE 27017
+COPY data/users.json ./
+COPY data/counties.json ./
+
+COPY init/init-db.js ./
+COPY init/package.json ./
+COPY init/package-lock.json ./
+COPY init/collections.json ./
+
+# install dependencies.
+RUN npm install
+
+# run database initialization. 
+CMD ["npm", "run", "init-color-my-country-db"]
