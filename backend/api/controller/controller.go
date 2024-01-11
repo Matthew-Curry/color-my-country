@@ -52,7 +52,8 @@ func deleteUserCounties(w http.ResponseWriter, r *http.Request, counties []strin
 	}
 	dao.DeleteCountiesforUser(counties, ID)
 }
-//will county be a string? Int? Generic type? (for now string)
+
+// will county be a string? Int? Generic type? (for now string)
 func addcounties(w http.ResponseWriter, r *http.Request, counties []string) {
 	// Parse query parameters from the request
 	queryParams := r.URL.Query()
@@ -66,5 +67,5 @@ func addcounties(w http.ResponseWriter, r *http.Request, counties []string) {
 		fmt.Print("error")
 	}
 	dao.AddCounitesForUser(counties, ID)
-	
+
 }

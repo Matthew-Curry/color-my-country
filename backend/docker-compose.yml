@@ -15,6 +15,7 @@ services:
     image: init-color-my-country-db
     depends_on:
       - db
+    
 
   # api:
     # image: ry-bois-cool-api
