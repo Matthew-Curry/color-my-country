@@ -7,6 +7,8 @@ services:
       - mongo-data:/data/db
     ports:
       - "27017:27017"
+    networks:
+      - main-network
 
   init-db:
     build:
@@ -17,12 +19,23 @@ services:
       - db
     
 
-  # api:
-    # image: ry-bois-cool-api
-    # depends_on:
-      # - init-db
-    # The API's startup logic should check that the test user exists
-    # and the count of the counties is correct.
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: API
+    depends_on:
+      - init-db
+    ports: 
+      8080:8080
+    networks:
+      - main-network
+    #The API's startup logic should check that the test user exists
+    #and the count of the counties is correct.
 
 volumes:
   mongo-data:
+#allows the containers to communicate with eachother
+networks:
+  main-network:
+    driver: bridge
