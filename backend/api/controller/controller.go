@@ -108,6 +108,18 @@ func ConnectToDatabase() {
 	fmt.Println("Tests were successful!")
 
 	//test counties
+	//get county collection
+	counties := database.Collection("counties")
+
+	//get county count
+	count, err := counties.CountDocuments(context.Background(), bson.D{})
+	//print error(if there is one)
+	if err != nil {
+		log.Fatal("Error get county data")
+	}
+	//print county count
+	fmt.Printf("%d Counties exist in the database", count)
+
 }
 
 // will use GeoLocater package to get counties for a user given their google maps JSON, and then call the database to add these counties to the users list, if they do not already exist
