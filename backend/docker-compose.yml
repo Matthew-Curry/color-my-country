@@ -23,7 +23,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    image: API
+    image: api
     depends_on:
       - init-db
     ports: 
