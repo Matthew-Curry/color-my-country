@@ -27,7 +27,7 @@ services:
     depends_on:
       - init-db
     ports: 
-      8080:8080
+      - "8080:8080"
     networks:
       - main-network
     #The API's startup logic should check that the test user exists
