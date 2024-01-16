@@ -105,7 +105,7 @@ func ConnectToDatabase() bool {
 		log.Fatal("Error. Test User counties is not zero")
 	}
 
-	fmt.Println("Tests were successful!")
+	fmt.Println("Tests were successful! User ID: %s. Username: %s. User counties = %v", users[0].userID, users[0].username, users[0].counties)
 
 	//test counties
 	//get county collection
