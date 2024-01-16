@@ -24,7 +24,7 @@ import (
 //"time"
 
 // create database connection, and test to see if correct data is in database
-func ConnectToDatabase() {
+func ConnectToDatabase() bool {
 	//struct that will be used to hold user data
 	type User struct {
 		_id      primitive.ObjectID
@@ -119,6 +119,8 @@ func ConnectToDatabase() {
 	}
 	//print county count
 	fmt.Printf("%d Counties exist in the database", count)
+
+	return true
 
 }
 

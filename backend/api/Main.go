@@ -8,6 +8,7 @@ package main
 
 import (
 	"Go-directory/controller"
+	"fmt"
 )
 
 //"GeoLocator"
@@ -20,7 +21,14 @@ import (
 
 func main() {
 	//initialize database connection
-	controller.ConnectToDatabase()
+	//wait for a return value to end function and print whether successful or not
+	if success := controller.ConnectToDatabase(); success {
+		fmt.Println("Connection successful!")
+	} else {
+		fmt.Println("Connection failed.")
+	}
+
+	//controller.ConnectToDatabase()
 
 	//initialize services
 
