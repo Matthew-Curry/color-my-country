@@ -1,6 +1,7 @@
 version: '3.7'
 
 services:
+  #contains data
   db:
     image: mongo:7.0
     volumes:
@@ -9,7 +10,7 @@ services:
       - "27017:27017"
     networks:
       - main-network
-
+  #populates database with data
   init-db:
     build:
       context: ./database
@@ -18,7 +19,7 @@ services:
     depends_on:
       - db
     
-
+  #api container that performs neccessary functions
   api:
     build:
       context: ./api

@@ -1,17 +1,14 @@
-//Should work with test user for now
-
-//query database, make sure data is built and correct(run loop until condition is true)
-//initialize services
-//need to write your own docker file, and point to it in docker-compose for the api
-
 package main
-
+/********************************************************************************
+* Description: The controller handles important user functions, and uses the    *
+* dao package to actually connect to the database                               *
+*********************************************************************************/
 import (
-	"Go-directory/controller"
-	"fmt"
+	api "Go-directory/API_Init"
+	"log"
+	"net/http"
+	"time"
 )
-
-//"GeoLocator"
 
 //first need to understand mongo db, how to connect and query database. Then need to properly run curl commands to test main to make sure it querys database
 
@@ -20,16 +17,25 @@ import (
 //Then docker
 
 func main() {
-	//initialize database connection
-	//wait for a return value to end function and print whether successful or not
-	if success := controller.ConnectToDatabase(); success {
-		fmt.Println("Connection successful!")
-	} else {
-		fmt.Println("Connection failed.")
+	//create a new API
+	API, err := api.NewAPI()
+	//if there is an error, log the error
+	if err != nil {
+		log.Fatal(err)
+	}
+	//initialize the router so it can be used to redirect
+	router := API.SetupRoutes()
+
+	// Start the HTTP server
+	addr := ":8080"
+	server := &http.Server{
+		Addr:    addr,
+		Handler: router,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
 
-	//controller.ConnectToDatabase()
-
-	//initialize services
+	log.Printf("Server listening on %s", addr)
+	log.Fatal(server.ListenAndServe())
 
 }

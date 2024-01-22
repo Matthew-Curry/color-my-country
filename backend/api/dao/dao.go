@@ -1,12 +1,13 @@
 package dao
 
-
-
-
+import "go.mongodb.org/mongo-driver/mongo"
+/********************************************************************************
+* Description: dao.go is an interface that contains all database functions to   *
+* be implemented by daoPostgres                                                 *
+*********************************************************************************/
 type DaoInterFace interface {
 	GetUserCounites(userID int)
 	AddCounitesForUser(counties []string, userId int)
 	DeleteCountiesforUser(counties []string, userId int)
+	testDatabase(database mongo.Database)
 }
-
-

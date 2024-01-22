@@ -1,7 +1,10 @@
 package GeoLocater
 
 /**************************************************************************
-*Credits:                                                                 *
+* Description: GeoLocater is used to take all of the coordinates from the *
+* Google Maps JSON and convert to counties. From there an array of        *
+* counties are returned.                                                  *
+* Credits:                                                                *
 *-Nerdcademy                                                              *
 *	Source code can be found at https://github.com/NerdCademyDev/golang   *
 *-Chat GPT                                                                *
@@ -11,6 +14,7 @@ package GeoLocater
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -91,6 +95,7 @@ type TimelineData struct {
 	TimelineObjects []TimelineObject `json:"timelineObjects"`
 }
 
+// this function is used to get the JSON response of the geocoding api given the latitude and longitude.
 func getJson(url string, target interface{}) error {
 	resp, err := client.Get(url)
 	if err != nil {
@@ -114,6 +119,7 @@ func getCoordInfo(lat float64, lon float64) (string, error) {
 	var inputStruct GeocodeResponse
 
 	err := getJson(Url, &inputStruct)
+	//if there is an error log the error, if not return the county from the json response
 
 	if err != nil {
 		fmt.Print("HTTP error")
@@ -126,6 +132,7 @@ func getCoordInfo(lat float64, lon float64) (string, error) {
 }
 
 func GetCounties(GoogleJson []byte) []string {
+	//testing on
 	//content, err := os.ReadFile("./Example_GoogleData/2023_SEPTEMBER.json")
 	/*
 		if err != nil {
@@ -134,13 +141,13 @@ func GetCounties(GoogleJson []byte) []string {
 
 		//fmt.Print(content)
 	*/
-
+	//unmarshall the given google json into the userLocation struct
 	var userLocation TimelineData
 	err := json.Unmarshal(GoogleJson, &userLocation)
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
-
+	//make the userLocation into a string array
 	countyArr := make([]string, len(userLocation.TimelineObjects))
 
 	//converts to proper latitude
@@ -151,7 +158,7 @@ func GetCounties(GoogleJson []byte) []string {
 		//converts to proper longitude
 		Longitude := float64((userLocation.TimelineObjects[0].PlaceVisit.Location.LongitudeE7)) / 10000000.0
 		fmt.Printf("%.8f\n", Longitude)
-
+		//find the county for the coordinates
 		County, err := getCoordInfo(Latitude, Longitude)
 		if err != nil {
 			fmt.Print("Error getting coordinate information")
@@ -160,9 +167,41 @@ func GetCounties(GoogleJson []byte) []string {
 		}
 
 	}
-
+	//timeout if time exceeds 10 seconds
 	client = &http.Client{Timeout: 10 * time.Second}
-
+	//return the countyArr
 	return countyArr
+
+}
+
+// Geolocator service
+func GeoService(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//check to see if method is post
+		//if so return method not allowed status
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Check if the Content-Type is "application/json", if not return
+		contentType := r.Header.Get("Content-Type")
+		if contentType != "application/json" {
+			http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
+			return
+		}
+
+		// Read the request body
+		userJson, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Error reading request body", http.StatusInternalServerError)
+			return
+		}
+
+		//give request body to function
+		GetCounties(userJson)
+
+		//call appropriate database methods to save user counties
+	}
 
 }
