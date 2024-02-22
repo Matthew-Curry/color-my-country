@@ -1,10 +1,13 @@
 package main
+
 /********************************************************************************
 * Description: The controller handles important user functions, and uses the    *
 * dao package to actually connect to the database                               *
 *********************************************************************************/
 import (
 	api "Go-directory/API_Init"
+	"Go-directory/dao"
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -17,20 +20,25 @@ import (
 //Then docker
 
 func main() {
+
 	//create a new API
 	API, err := api.NewAPI()
 	//if there is an error, log the error
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//test the database
+	dao.TestDatabase(API.DB, context.Background())
+
 	//initialize the router so it can be used to redirect
 	router := API.SetupRoutes()
 
 	// Start the HTTP server
 	addr := ":8080"
 	server := &http.Server{
-		Addr:    addr,
-		Handler: router,
+		Addr:         addr,
+		Handler:      router,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}

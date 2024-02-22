@@ -1,4 +1,5 @@
 package controller
+
 /********************************************************************************
 * Description: The controller handles important user functions, and uses the    *
 * dao package to actually connect to the database                               *
@@ -6,14 +7,17 @@ package controller
 import (
 	"Go-directory/dao"
 	GeoLocater "Go-directory/services"
+
 	//"context"
 	"fmt"
-	"io/ioutil"
+	//"io/ioutil"
+	
 	//"log"
 	"net/http"
 	"strconv"
-	//"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+	//"time"
 	//"go.mongodb.org/mongo-driver/bson"
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 	//"go.mongodb.org/mongo-driver/mongo"
@@ -26,29 +30,19 @@ import (
 //"strconv"
 //"time"
 
-
-
 // will use GeoLocater package to get counties for a user given their google maps JSON, and then call the database to add these counties to the users list, if they do not already exist
-func GetListOfUserCounties(w http.ResponseWriter, r *http.Request) {
+func GetListOfUserCounties(w http.ResponseWriter, r *http.Request, database mongo.Database) []byte {
 
-	// Parse query parameters from the request
-	queryParams := r.URL.Query()
+	// Get query parameter for username
+    queryParams := r.URL.Query()
 
-	// Access specific query parameters by name
-	userId := queryParams.Get("userid")
-	//convert userId to int
-	ID, err := strconv.Atoi(userId)
+    // Get specific query parameter values (for now it's username)
+    username := queryParams.Get("username")
 
-	//gets user json from http request body
-	UserJson, err := ioutil.ReadAll(r.Body)
+    // Get JSON data from dao
+    JSON := dao.GetUserCounites(username, database)
 
-	if err != nil {
-		fmt.Print("error")
-	}
-	//gives user json to geolocater, which returns a list of the counties within json
-	counties := GeoLocater.GetCounties(UserJson)
-	//calls database method to add counties to user object (if they dont already exist)
-	dao.AddCounitesForUser(counties, ID)
+    return JSON
 
 }
 
@@ -84,6 +78,6 @@ func Addcounties(w http.ResponseWriter, r *http.Request, counties []string) {
 
 }
 
-func handleGoogleJson(w http.ResponseWriter, r *http.Request) {
+func HandleGoogleJson(w http.ResponseWriter, r *http.Request) {
 	GeoLocater.GeoService(w, r)
 }

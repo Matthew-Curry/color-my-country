@@ -1,4 +1,5 @@
 package dao
+
 /********************************************************************************
 * Description: daoPostgres implements the dao interface and is used to interact *
 * with the database                                                             *
@@ -7,8 +8,9 @@ import (
 	//"Go-directory/dao"
 	//GeoLocater "Go-directory/services"
 	"context"
-	"fmt"
 
+	"fmt"
+	"encoding/json"
 	//"io/ioutil"
 	"log"
 	//"net/http"
@@ -23,32 +25,81 @@ import (
 	//"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-//add counties to a users database
+type User struct {
+	_id      primitive.ObjectID
+	userID   string
+	username string
+	counties []string
+}
+
+type GeoFeature struct {
+	ID         string `json:"_id"`
+	Type       string `json:"type"`
+	Properties struct {
+		GEOID      string  `json:"GEO_ID"`
+		State      string  `json:"STATE"`
+		County     string  `json:"COUNTY"`
+		Name       string  `json:"NAME"`
+		LSAD       string  `json:"LSAD"`
+		CensusArea float64 `json:"CENSUSAREA"`
+	} `json:"properties"`
+}
+
+
+
+
+// add counties to a users database
 func AddCounitesForUser(counties []string, userId int) {
 
 }
-//retrive counties for a user
-func GetUserCounites(userID int) {
+
+// retrive counties for a user
+// return json from database
+
+func GetUserCounites(userID string, database mongo.Database) []byte {
+	
+	collection := database.Collection("users")
+
+	// Define a filter to find the user by username
+	filter := bson.D{{"username", userID}}
+
+	// Create an instance of the User struct to store the result
+	var user User
+
+
+	ctx := context.Background()
+
+	// Perform the query
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("User not found.")
+		return nil
+	} else if err != nil {
+		log.Fatal(err)
+	}
+
+	// Access the array of counties for the user
+	counties := user.counties
+	//convert counties to a json
+	JSON,err := json.Marshal(counties)
+	//return the user counties
+	return JSON
+	
 
 }
-//delete counties for a user
+
+// delete counties for a user
 func DeleteCountiesforUser(counties []string, userId int) {
 
 }
 
 // create database connection, and test to see if correct data is in database
-func testDatabase(database mongo.Database, ctx context.Context) bool {
+func TestDatabase(database *mongo.Database, ctx context.Context) bool {
 	//struct that will be used to hold user data
-	type User struct {
-		_id      primitive.ObjectID
-		userID   string
-		username string
-		counties []string
-	}
+	
 
 	testUser := database.Collection("users")
-	
-	
+
 	//see if test user is in the collection
 	filter := bson.D{{"username", "test"}}
 	cursor, err := testUser.Find(ctx, filter)
