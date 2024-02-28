@@ -12,14 +12,19 @@ package GeoLocater
 **************************************************************************/
 
 import (
+	//"Go-directory/dao"
+	"Go-directory/controller"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+
+	//"io/ioutil"
 	"log"
 	"net/http"
 
 	//"os"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var client *http.Client
@@ -175,33 +180,12 @@ func GetCounties(GoogleJson []byte) []string {
 }
 
 // Geolocator service
-func GeoService(w http.ResponseWriter, r *http.Request) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		//check to see if method is post
-		//if so return method not allowed status
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
+func GeoService(w http.ResponseWriter, r *http.Request, userJson []byte, database mongo.Database) {
 
-		// Check if the Content-Type is "application/json", if not return
-		contentType := r.Header.Get("Content-Type")
-		if contentType != "application/json" {
-			http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
-			return
-		}
+	//give request body to function
+	Usercounties := GetCounties(userJson)
 
-		// Read the request body
-		userJson, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "Error reading request body", http.StatusInternalServerError)
-			return
-		}
-
-		//give request body to function
-		GetCounties(userJson)
-
-		//call appropriate database methods to save user counties
-	}
+	//call appropriate database methods to save user counties
+	controller.Addcounties(w, r, Usercounties, database)
 
 }

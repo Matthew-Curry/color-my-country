@@ -8,6 +8,8 @@ package api
 *********************************************************************************/
 import (
 	"Go-directory/controller"
+	GeoLocater "Go-directory/services"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -16,6 +18,7 @@ import (
 	//"Go-directory/dao"
 	//GeoLocater "Go-directory/services"
 	"context"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -28,6 +31,7 @@ import (
 
 // API structs
 type userCounties struct {
+	Counties []string `json:"Counties"`
 }
 
 type API struct {
@@ -111,6 +115,8 @@ func (api *API) SetupRoutes() *mux.Router {
 	// Define your routes using the router and API methods
 	router.HandleFunc("/uploadJSON", api.handleGoogleJson).Methods("POST")
 	router.HandleFunc("/getUserCounties", api.getCountiesforUser).Methods("GET")
+	router.HandleFunc("/uploadCounties", api.uploadUserCounties).Methods("POST")
+	router.HandleFunc("/deleteCounties", api.deleteUserCounties).Methods("POST")
 
 	// Add other routes
 	//return the router
@@ -119,7 +125,28 @@ func (api *API) SetupRoutes() *mux.Router {
 
 // calls Geoservice to upload user JSON
 func (api *API) handleGoogleJson(w http.ResponseWriter, r *http.Request) {
-	controller.HandleGoogleJson(w, r)
+	//check to see if method is post
+	//if so return method not allowed status
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check if the Content-Type is "application/json", if not return
+	contentType := r.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
+		return
+	}
+
+	// Read the request body
+	userJson, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	GeoLocater.GeoService(w, r, userJson, *api.DB)
 }
 
 func (api *API) getCountiesforUser(w http.ResponseWriter, r *http.Request) {
@@ -133,4 +160,65 @@ func (api *API) getCountiesforUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Error writing JSON to response: ", err)
 	}
+}
+
+func (api *API) uploadUserCounties(w http.ResponseWriter, r *http.Request) {
+	//check to see if method is post
+	//if so return method not allowed status
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check if the Content-Type is "application/json", if not return
+	contentType := r.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
+		return
+	}
+
+	// Read the request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	//unmarshall the json (retrive the county array)
+	var counties userCounties
+
+	err = json.Unmarshal(body, &counties)
+
+	controller.Addcounties(w, r, counties.Counties, *api.DB)
+}
+
+func (api *API) deleteUserCounties(w http.ResponseWriter, r *http.Request) {
+	//check to see if method is post
+	//if so return method not allowed status
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check if the Content-Type is "application/json", if not return
+	contentType := r.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		http.Error(w, "Unsupported Media Type", http.StatusUnsupportedMediaType)
+		return
+	}
+
+	// Read the request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+
+	//unmarshall the json (retrive the county array)
+	var counties userCounties
+
+	err = json.Unmarshal(body, &counties)
+
+	controller.DeleteUserCounties(w, r, counties.Counties, *api.DB)
+
 }

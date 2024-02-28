@@ -9,13 +9,14 @@ import (
 	//GeoLocater "Go-directory/services"
 	"context"
 
-	"fmt"
 	"encoding/json"
+	"fmt"
+
 	//"io/ioutil"
 	"log"
 	//"net/http"
 	//"strconv"
-	//"time"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -45,11 +46,34 @@ type GeoFeature struct {
 	} `json:"properties"`
 }
 
-
-
-
 // add counties to a users database
-func AddCounitesForUser(counties []string, userId int) {
+func AddCounitesForUser(counties []string, username string, database mongo.Database) {
+	//Get the users collection
+	collection := database.Collection("users")
+	//find the user
+	filter := bson.D{{"username", username}}
+	//define update operations(append to county array multiple counties)
+	update := bson.M{
+		"$push": bson.M{
+			"counties": bson.M{"$each": counties},
+		},
+	}
+
+	ctx := context.Background()
+
+	//execute the update
+	updateResult, err := collection.UpdateOne(ctx, filter, update)
+	//log the error if there is one
+	if err != nil {
+		log.Fatal(err)
+	}
+	//print whether or not any of the array elements were modified
+	if updateResult.ModifiedCount == 0 {
+		fmt.Println("No documents matched the filter.")
+		return
+	}
+
+	fmt.Printf("Updated %v document(s)\n", updateResult.ModifiedCount)
 
 }
 
@@ -57,7 +81,7 @@ func AddCounitesForUser(counties []string, userId int) {
 // return json from database
 
 func GetUserCounites(userID string, database mongo.Database) []byte {
-	
+
 	collection := database.Collection("users")
 
 	// Define a filter to find the user by username
@@ -65,7 +89,6 @@ func GetUserCounites(userID string, database mongo.Database) []byte {
 
 	// Create an instance of the User struct to store the result
 	var user User
-
 
 	ctx := context.Background()
 
@@ -81,22 +104,51 @@ func GetUserCounites(userID string, database mongo.Database) []byte {
 	// Access the array of counties for the user
 	counties := user.counties
 	//convert counties to a json
-	JSON,err := json.Marshal(counties)
+	JSON, err := json.Marshal(counties)
 	//return the user counties
 	return JSON
-	
 
 }
 
 // delete counties for a user
-func DeleteCountiesforUser(counties []string, userId int) {
+func DeleteCountiesforUser(counties []string, username string, database mongo.Database) {
+	// Get the users collection
+	collection := database.Collection("users")
+
+	// Find the user
+	filter := bson.D{{"username", username}}
+
+	// Define update operations (remove multiple counties from array)
+	update := bson.M{
+		"$pullAll": bson.M{
+			"counties": counties,
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	defer cancel()
+	// Execute the update
+	updateResult, err := collection.UpdateOne(ctx, filter, update)
+
+	// Log the error if there is one
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Print whether or not any of the array elements were modified
+	if updateResult.ModifiedCount == 0 {
+		fmt.Println("No documents matched the filter.")
+		return
+	}
+
+	fmt.Printf("Updated %v document(s)\n", updateResult.ModifiedCount)
 
 }
 
 // create database connection, and test to see if correct data is in database
 func TestDatabase(database *mongo.Database, ctx context.Context) bool {
 	//struct that will be used to hold user data
-	
 
 	testUser := database.Collection("users")
 

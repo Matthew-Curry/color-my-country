@@ -6,15 +6,15 @@ package controller
 *********************************************************************************/
 import (
 	"Go-directory/dao"
-	GeoLocater "Go-directory/services"
+	//GeoLocater "Go-directory/services"
 
 	//"context"
-	"fmt"
+	//"fmt"
 	//"io/ioutil"
 	
 	//"log"
 	"net/http"
-	"strconv"
+	//"strconv"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	//"time"
@@ -46,38 +46,26 @@ func GetListOfUserCounties(w http.ResponseWriter, r *http.Request, database mong
 
 }
 
-func DeleteUserCounties(w http.ResponseWriter, r *http.Request, counties []string) {
+func DeleteUserCounties(w http.ResponseWriter, r *http.Request, counties []string, database mongo.Database) {
 	// Parse query parameters from the request
 	queryParams := r.URL.Query()
 
 	// Access specific query parameters by name
-	userId := queryParams.Get("userid")
-	//convert userId to int
-	ID, err := strconv.Atoi(userId)
-	//handle error
-	if err != nil {
-		fmt.Print("error")
-	}
-	dao.DeleteCountiesforUser(counties, ID)
+	username := queryParams.Get("username")
+	
+	
+	
+	dao.DeleteCountiesforUser(counties, username, database)
 }
 
 // Add counties to database for a user
-func Addcounties(w http.ResponseWriter, r *http.Request, counties []string) {
+func Addcounties(w http.ResponseWriter, r *http.Request, counties []string, database mongo.Database) {
 	// Parse query parameters from the request
 	queryParams := r.URL.Query()
 
 	// Access specific query parameters by name
-	userId := queryParams.Get("userid")
-	//convert userId to int
-	ID, err := strconv.Atoi(userId)
-	//handle error
-	if err != nil {
-		fmt.Print("error")
-	}
-	dao.AddCounitesForUser(counties, ID)
+	username := queryParams.Get("username")
 
-}
+	dao.AddCounitesForUser(counties, username, database)
 
-func HandleGoogleJson(w http.ResponseWriter, r *http.Request) {
-	GeoLocater.GeoService(w, r)
 }
