@@ -13,20 +13,17 @@ import (
 	"fmt"
 	"net/http"
 
-	//"go.mongodb.org/mongo-driver/bson"
-	//"go.mongodb.org/mongo-driver/bson/primitive"
-	//"Go-directory/dao"
-	//GeoLocater "Go-directory/services"
 	"context"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
-	//"encoding/json"
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 // API structs
@@ -43,15 +40,20 @@ type API struct {
 }
 
 // Initialize and return a database connection
-func NewDatabase() (*mongo.Database, error, context.Context) {
-	//connect to the database container
-	dataBaseContainerURI := "mongodb://backend-db-1:27017"
-
+func NewDatabase() (*mongo.Database, error, context.Context, *mongo.Client) {
+	// check to see if environment is dockerized. If so, set connection string appropriately
+	dockerEnv := os.Getenv("DOCKERIZED")
+	dataBaseContainerURI := ""
+	if dockerEnv != "" {
+		dataBaseContainerURI = "mongodb://db:27017" // docker connection
+	} else {
+		dataBaseContainerURI = "mongodb://localhost:27017" // local connection
+	}
 	//setup mongo connection through database container
 	client, err := mongo.NewClient(options.Client(), options.Client().ApplyURI(dataBaseContainerURI))
 	//if the connection cannot be established, log the error
 	if err != nil {
-		return nil, fmt.Errorf("Can't establish connection to database"), nil
+		return nil, fmt.Errorf("Can't establish connection to database"), nil, nil
 	}
 	//give the mongo driver a defined timeout
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
@@ -59,20 +61,18 @@ func NewDatabase() (*mongo.Database, error, context.Context) {
 	err = client.Connect(ctx)
 	//if the connection cannot be established, log the error
 	if err != nil {
-		return nil, fmt.Errorf("Can't establish connection to database"), nil
+		return nil, fmt.Errorf("Can't establish connection to database"), nil, nil
 	}
 	//disconnect if the connection cannot be established
-	defer client.Disconnect(ctx)
+	//defer client.Disconnect(ctx)
 	//ping the database to see if connection is established
-	err = client.Ping(ctx, readpref.Primary())
-	//if there is an error, print error
-	if err != nil {
-		return nil, fmt.Errorf("Can't establish connection to database"), nil
+	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+		panic(err)
 	}
 	//setup database connection
 	database := client.Database("color-my-country-db")
 	//return the database connection
-	return database, nil, ctx
+	return database, nil, ctx, client
 }
 
 // Initialize and return a logger
@@ -82,11 +82,11 @@ func NewLogger() (*log.Logger, error) {
 }
 
 // initialize a new api
-func NewAPI() (*API, error) {
+func NewAPI() (*API, error, *mongo.Client) {
 	//create a database connection
-	db, err, ctx := NewDatabase()
+	db, err, ctx, client := NewDatabase()
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
 	//so ctx error goes away
@@ -95,7 +95,7 @@ func NewAPI() (*API, error) {
 	//create a logger
 	logger, err := NewLogger()
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 	//create an api from the API struct
 	api := &API{
@@ -105,20 +105,19 @@ func NewAPI() (*API, error) {
 
 	}
 	//return the api
-	return api, nil
+	return api, nil, client
 }
 
 // create routes and set handler functions for each route
 func (api *API) SetupRoutes() *mux.Router {
 	router := mux.NewRouter()
 
-	// Define your routes using the router and API methods
+	// Define the routes using the router and API methods
 	router.HandleFunc("/uploadJSON", api.handleGoogleJson).Methods("POST")
 	router.HandleFunc("/getUserCounties", api.getCountiesforUser).Methods("GET")
 	router.HandleFunc("/uploadCounties", api.uploadUserCounties).Methods("POST")
 	router.HandleFunc("/deleteCounties", api.deleteUserCounties).Methods("POST")
 
-	// Add other routes
 	//return the router
 	return router
 }
@@ -220,5 +219,4 @@ func (api *API) deleteUserCounties(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &counties)
 
 	controller.DeleteUserCounties(w, r, counties.Counties, *api.DB)
-
 }

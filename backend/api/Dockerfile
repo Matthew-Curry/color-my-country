@@ -15,6 +15,9 @@ RUN go mod download
 # Copy the local package files to the container's working directory
 COPY . .
 
+#Set environment variable indicating docker environment
+ENV DOCKERIZED=True
+
 # Build the Go application
 RUN go build -o main .
 

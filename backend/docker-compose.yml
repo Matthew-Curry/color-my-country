@@ -18,6 +18,8 @@ services:
     image: init-color-my-country-db
     depends_on:
       - db
+    networks:
+      - main-network
     
   #api container that performs neccessary functions
   api:
